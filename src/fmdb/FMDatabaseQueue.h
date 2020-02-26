@@ -202,6 +202,14 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)inDatabase:(__attribute__((noescape)) void (^)(FMDatabase *db))block;
 
+/** Asynchronously perform database operations on queue.
+ 
+ @param block The code to be run on the queue of `FMDatabaseQueue`
+ */
+
+- (void)inDatabaseAsync:(__attribute__((noescape)) void (^)(FMDatabase *db))block;
+
+
 /** Synchronously perform database operations on queue, using transactions.
 
  @param block The code to be run on the queue of `FMDatabaseQueue`
@@ -218,12 +226,37 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)inTransaction:(__attribute__((noescape)) void (^)(FMDatabase *db, BOOL *rollback))block;
 
+
+/** Asynchronously perform database operations on queue, using transactions.
+
+ @param block The code to be run on the queue of `FMDatabaseQueue`
+ 
+ @warning    Unlike SQLite's `BEGIN TRANSACTION`, this method currently performs
+             an exclusive transaction, not a deferred transaction. This behavior
+             is likely to change in future versions of FMDB, whereby this method
+             will likely eventually adopt standard SQLite behavior and perform
+             deferred transactions. If you really need exclusive tranaction, it is
+             recommended that you use `inExclusiveTransaction`, instead, not only
+             to make your intent explicit, but also to future-proof your code.
+
+ */
+
+- (void)inTransactionAsync:(__attribute__((noescape)) void (^)(FMDatabase *db, BOOL *rollback))block;
+
 /** Synchronously perform database operations on queue, using deferred transactions.
  
  @param block The code to be run on the queue of `FMDatabaseQueue`
  */
 
 - (void)inDeferredTransaction:(__attribute__((noescape)) void (^)(FMDatabase *db, BOOL *rollback))block;
+
+/** Asynchronously perform database operations on queue, using deferred transactions.
+ 
+ @param block The code to be run on the queue of `FMDatabaseQueue`
+ */
+
+- (void)inDeferredTransactionAsync:(__attribute__((noescape)) void (^)(FMDatabase *db, BOOL *rollback))block;
+
 
 /** Synchronously perform database operations on queue, using exclusive transactions.
  
@@ -232,12 +265,28 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)inExclusiveTransaction:(__attribute__((noescape)) void (^)(FMDatabase *db, BOOL *rollback))block;
 
+
+/** Asynchronously perform database operations on queue, using exclusive transactions.
+ 
+ @param block The code to be run on the queue of `FMDatabaseQueue`
+ */
+
+- (void)inExclusiveTransactionAsync:(__attribute__((noescape)) void (^)(FMDatabase *db, BOOL *rollback))block;
+
+
 /** Synchronously perform database operations on queue, using immediate transactions.
 
  @param block The code to be run on the queue of `FMDatabaseQueue`
  */
 
 - (void)inImmediateTransaction:(__attribute__((noescape)) void (^)(FMDatabase *db, BOOL *rollback))block;
+
+/** Asynchronously perform database operations on queue, using immediate transactions.
+
+ @param block The code to be run on the queue of `FMDatabaseQueue`
+ */
+
+- (void)inImmediateTransactionAsync:(__attribute__((noescape)) void (^)(FMDatabase *db, BOOL *rollback))block;
 
 ///-----------------------------------------------
 /// @name Dispatching database operations to queue
@@ -251,6 +300,15 @@ NS_ASSUME_NONNULL_BEGIN
 // NOTE: you can not nest these, since calling it will pull another database out of the pool and you'll get a deadlock.
 // If you need to nest, use FMDatabase's startSavePointWithName:error: instead.
 - (NSError * _Nullable)inSavePoint:(__attribute__((noescape)) void (^)(FMDatabase *db, BOOL *rollback))block;
+
+/** Asynchronously perform database operations using save point.
+
+ @param block The code to be run on the queue of `FMDatabaseQueue`
+ */
+
+// NOTE: you can not nest these, since calling it will pull another database out of the pool and you'll get a deadlock.
+// If you need to nest, use FMDatabase's startSavePointWithName:error: instead.
+- (NSError * _Nullable)inSavePointAsync:(__attribute__((noescape)) void (^)(FMDatabase *db, BOOL *rollback))block;
 
 ///-----------------
 /// @name Checkpoint
